@@ -18,7 +18,7 @@ argparser.add_argument('--source', required=True,
                        help='Path to assignment to copy from. E.g: "duck1010.spring2010.assignment1"')
 argparser.add_argument('--target', required=True,
                        help='Path to assignment to copy to. E.g: "duck1010.spring2010.assignment2"')
-argparser.add_argument('--allow_nonempty', default=False, action='store_false',
+argparser.add_argument('--allow_nonempty', default=False, action='store_true',
                        help=('Allow non-empty target assignment? If you enable '
                              'this, students are copied to the target even if they '
                              'already exist in a group within the target.'))
@@ -62,3 +62,4 @@ for group in sourcegroups:
     DeadlineApi.create(logincookie,
                        deadline='{0}:00'.format(args.deadline),
                        assignment_group=group['id'])
+print "Copied {0} groups from {1} to {2}.".format(len(sourcegroups), args.source, args.target)
