@@ -34,10 +34,17 @@ DeadlineApi = restful_factory.make('/administrator/restfulsimplifieddeadline/')
 #pprint(AssignmentGroupApi.search(logincookie))
 #subject, period, assignment = 'duck1100.spring01.week1'.split('.')
 
-source_assignment_id = find_assignment_id_by_shortnames(AssignmentApi, logincookie,
-                                                        *args.source.split('.'))
-target_assignment_id = find_assignment_id_by_shortnames(AssignmentApi, logincookie,
+try:
+    source_assignment_id = find_assignment_id_by_shortnames(AssignmentApi, logincookie,
+                                                            *args.source.split('.'))
+except LookupError:
+    raise SystemExit('Assignment {0} not found.'.format(args.source))
+
+try:
+    target_assignment_id = find_assignment_id_by_shortnames(AssignmentApi, logincookie,
                                                         *args.target.split('.'))
+except LookupError:
+    raise SystemExit('Assignment {0} not found.'.format(args.target))
 sourcegroups = find_groups_in_assignment(AssignmentGroupApi, logincookie, source_assignment_id,
                                          result_fieldgroups=['feedback', 'users', 'tags'])
 
