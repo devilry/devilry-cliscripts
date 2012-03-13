@@ -67,3 +67,48 @@ def find_all_assignmentgroups_in_period(AssignmentGroupApi, logincookie, period_
                                                  'value':period_id}],
                                        result_fieldgroups=['assignment']) # Include info about the assignment in the result
     return search['items']
+
+
+def find_assignments_in_period(AssignmentApi, logincookie, period_id, limit=100000):
+    """
+    Find all assignments within a specific period.
+    """
+    search = AssignmentApi.search(logincookie,
+                                  filters=[{'field':'parentnode', 'comp':'exact', 'value':period_id}],
+                                  limit=limit)
+    return search['items']
+
+
+def find_assignment_groups_in_assignment(AssignmentGroupApi, logincookie,
+                                         assignment_id, limit=100000,
+                                         result_fieldgroups=['feedback', 'users']):
+    """
+    Find all AssignmentGroups in the given assignmnent.
+    """
+    search = AssignmentGroupApi.search(logincookie,
+                                       limit=100000,
+                                       filters=[{'field':'parentnode', 'comp':'exact', 'value':assignment_id}],
+                                       # Get the latest feedback and students in addition to information stored
+                                       # directly on each group.
+                                       result_fieldgroups=result_fieldgroups)
+    return search['items']
+
+
+
+def aggregate_points_for_each_student(AssignmentApi, AssignmentGroupApi, logincookie, period_id):
+    """
+    Group the information available on a period by student and assignment.
+    """
+    students = {}
+    all_assignments = set()
+    for assignment in find_assignments_in_period(AssignmentApi, logincookie, period_id):
+        assignment_shortname = assignment['short_name']
+        all_assignments.add(assignment_shortname)
+        for group in find_assignment_groups_in_assignment(AssignmentGroupApi,
+                                                          logincookie,
+                                                          assignment['id']):
+            for username in group['candidates__student__username']:
+                if not username in students:
+                    students[username] = {}
+                students[username][assignment_shortname] = group
+    return students, all_assignments
