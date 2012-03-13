@@ -7,7 +7,8 @@ AVAILABLE_LOGINPROFILES = ', '.join(repr(p) for p in LOGIN_PROFILES)
 
 
 def add_login_args(argparser):
-    argparser.add_argument('--user', required=True)
+    argparser.add_argument('--user', required=True,
+                           help='Username used to login to Devilry. You are prompted for a password.')
     argparser.add_argument('--loginprofile', default=None,
                            help=('A login profile sets --usernamefield, --passwordfield '
                                  'and --loginpath according to a profile. Available profiles: {0}.'
