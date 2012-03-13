@@ -9,7 +9,7 @@ Devilry command line scripts. These scripts use the Devilry RESTful API to perfo
 
 ## Install
 
-No install is required. You just run the scripts.
+No install is required (except for the requirements above). You just run the scripts.
 
 
 ## Usage
