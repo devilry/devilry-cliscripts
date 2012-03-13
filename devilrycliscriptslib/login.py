@@ -2,8 +2,9 @@ from devilryrestfullib import login
 
 
 LOGIN_PROFILES = dict(devilry={'usernamefield': 'username', 'passwordfield': 'password', 'loginpath': '/authenticate/login'},
-                     uio={'usernamefield': 'user', 'passwordfield': 'password', 'loginpath': '/login'})
+                      uio={'usernamefield': 'user', 'passwordfield': 'password', 'loginpath': '/login'})
 AVAILABLE_LOGINPROFILES = ', '.join(repr(p) for p in LOGIN_PROFILES)
+LOGINPROFILES_METAVAR = '|'.join(repr(p) for p in LOGIN_PROFILES)
 
 
 def add_login_args(argparser):
@@ -12,7 +13,8 @@ def add_login_args(argparser):
     argparser.add_argument('--loginprofile', default=None,
                            help=('A login profile sets --usernamefield, --passwordfield '
                                  'and --loginpath according to a profile. Available profiles: {0}.'
-                                 .format(AVAILABLE_LOGINPROFILES)))
+                                 .format(AVAILABLE_LOGINPROFILES)),
+                           metavar=LOGINPROFILES_METAVAR)
     argparser.add_argument('--usernamefield', default='username',
                            help='The username field in the login form. Defaults to "username".')
     argparser.add_argument('--passwordfield', default='password',
