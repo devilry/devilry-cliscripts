@@ -11,7 +11,11 @@ from devilrycliscriptslib.queries import aggregate_points_for_each_student
 from devilrycliscriptslib.utils import split_path
 
 
-argparser = ArgumentParser(description='Show a table with results for each student on the entire period aggregated.')
+argparser = ArgumentParser(description=('Show a table with results for each '
+                                        'student on the entire period '
+                                        'aggregated. Note that "no-data" means '
+                                        'that the student is not registered on '
+                                        'that assignment.'))
 add_common_args(argparser)
 argparser.add_argument('--period', required=True,
                        help='Path to the period. E.g: "duck1010.spring2010"')
@@ -50,7 +54,7 @@ def create_table_from_points_aggregate(students, all_assignments):
                 else:
                     total += points
             else:
-                points = 'no-data' # Student no registered on assignment
+                points = 'no-data' # Student not registered on assignment
             print ' {0:<20}'.format(points),
         print ' {0:<20}'.format(total)
 

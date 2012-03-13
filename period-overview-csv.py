@@ -16,8 +16,7 @@ from devilrycliscriptslib.utils import split_path
 argparser = ArgumentParser(description=('Show a table with CSV results for each '
                                         'student on the entire period '
                                         'aggregated. Meaning of the numbers in '
-                                        'the table: 0: no deliveries, 1: Has '
-                                        'deliveries, Not approved, 2: Approved'))
+                                        'the table: 0: No deliveries, 1: Not approved, 2: Approved'))
 add_common_args(argparser)
 argparser.add_argument('--period', required=True,
                        help='Path to the period. E.g: "duck1010.spring2010"')
@@ -34,8 +33,8 @@ def csv_approvedstats(students, all_assignments):
     """
     Create a csv table of students. For each assignment, a number is added:
 
-        0: no deliveries
-        1: Has deliveries Not approved
+        0: No deliveries
+        1: Not approved
         2: Approved
     """
     # Print header ({0:<20} format string makes positional arg 0 occupy 20 chars left aligned)
