@@ -1,4 +1,5 @@
-from pprint import pprint
+#!/usr/bin/env python
+
 from devilryrestfullib import RestfulFactory
 
 from devilrycliscriptslib.argparsewrapper import ArgumentParser
@@ -30,9 +31,6 @@ AssignmentGroupApi = restful_factory.make('/administrator/restfulsimplifiedassig
 AssignmentApi = restful_factory.make('/administrator/restfulsimplifiedassignment/')
 DeadlineApi = restful_factory.make('/administrator/restfulsimplifieddeadline/')
 
-
-#pprint(AssignmentGroupApi.search(logincookie))
-#subject, period, assignment = 'duck1100.spring01.week1'.split('.')
 
 try:
     source_assignment_id = find_assignment_id_by_shortnames(AssignmentApi, logincookie,
