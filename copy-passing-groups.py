@@ -57,16 +57,22 @@ if not args.allow_nonempty:
                          'groups. Use --allow_nonempty ignore this '
                          'check.'.format(len(targetgroups)))
 
-
+copied = 0
 for group in sourcegroups:
-    candidates = [dict(candidate_id=None, username=username)
-                  for username in group['candidates__student__username']]
-    group = create_group(AssignmentGroupApi, logincookie,
-                         target_assignment_id,
-                         candidates=candidates,
-                         examiners=group['examiners__user__username'],
-                         tags=group['tags__tag'])
-    DeadlineApi.create(logincookie,
-                       deadline='{0}:00'.format(args.deadline),
-                       assignment_group=group['id'])
-print "Copied {0} groups from {1} to {2}.".format(len(sourcegroups), args.source, args.target)
+    if group['feedback__is_passing_grade']:
+        candidates = [dict(candidate_id=None, username=username)
+                      for username in group['candidates__student__username']]
+        group = create_group(AssignmentGroupApi, logincookie,
+                             target_assignment_id,
+                             candidates=candidates,
+                             examiners=group['examiners__user__username'],
+                             tags=group['tags__tag'])
+        DeadlineApi.create(logincookie,
+                           deadline='{0}:00'.format(args.deadline),
+                           assignment_group=group['id'])
+        copied += 1
+
+print "Copied {copied}/{total} groups from {source} to {target}.".format(copied=copied,
+                                                                         total=len(sourcegroups),
+                                                                         source=args.source,
+                                                                         target=args.target)
