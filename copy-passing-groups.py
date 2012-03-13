@@ -8,6 +8,7 @@ from devilrycliscriptslib.commonargs import add_common_args
 from devilrycliscriptslib.queries import find_groups_in_assignment
 from devilrycliscriptslib.queries import find_assignment_id_by_shortnames
 from devilrycliscriptslib.managegroups import create_group
+from devilrycliscriptslib.utils import split_path
 
 
 argparser = ArgumentParser(description='Copy groups from one assignment to another.')
@@ -33,14 +34,16 @@ DeadlineApi = restful_factory.make('/administrator/restfulsimplifieddeadline/')
 
 
 try:
+    path = split_path(args.source, '--source', 3)
     source_assignment_id = find_assignment_id_by_shortnames(AssignmentApi, logincookie,
-                                                            *args.source.split('.'))
+                                                            *path)
 except LookupError:
     raise SystemExit('Assignment {0} not found.'.format(args.source))
 
 try:
+    path = split_path(args.target, '--target', 3)
     target_assignment_id = find_assignment_id_by_shortnames(AssignmentApi, logincookie,
-                                                        *args.target.split('.'))
+                                                            *path)
 except LookupError:
     raise SystemExit('Assignment {0} not found.'.format(args.target))
 sourcegroups = find_groups_in_assignment(AssignmentGroupApi, logincookie, source_assignment_id,

@@ -8,7 +8,7 @@ from devilrycliscriptslib.login import login_using_args
 from devilrycliscriptslib.commonargs import add_common_args
 from devilrycliscriptslib.queries import find_groups_in_assignment
 from devilrycliscriptslib.queries import find_assignment_id_by_shortnames
-
+from devilrycliscriptslib.utils import split_path
 
 argparser = ArgumentParser(description='List groups on an assignment as json encoded data.')
 add_common_args(argparser)
@@ -24,8 +24,9 @@ DeadlineApi = restful_factory.make('/administrator/restfulsimplifieddeadline/')
 
 
 try:
+    path = split_path(args.assignment, '--assignment', 3)
     source_assignment_id = find_assignment_id_by_shortnames(AssignmentApi, logincookie,
-                                                            *args.assignment.split('.'))
+                                                            *path)
 except LookupError:
     raise SystemExit('Assignment {0} not found.'.format(args.assignment))
 
