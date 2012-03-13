@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from getpass import getpass
 from devilryrestfullib import RestfulFactory
 
 from devilrycliscriptslib.argparsewrapper import ArgumentParser
@@ -26,7 +27,7 @@ argparser.add_argument('--allow_nonempty', default=False, action='store_true',
                              'already exist in a group within the target.'))
 args = argparser.parse_args()
 
-logincookie = login_using_args(args, 'test')
+logincookie = login_using_args(args, getpass())
 restful_factory = RestfulFactory(args.url)
 AssignmentGroupApi = restful_factory.make('/administrator/restfulsimplifiedassignmentgroup/')
 AssignmentApi = restful_factory.make('/administrator/restfulsimplifiedassignment/')

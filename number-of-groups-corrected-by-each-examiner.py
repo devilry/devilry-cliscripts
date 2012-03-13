@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from getpass import getpass
 from devilryrestfullib import RestfulFactory
 
 from devilrycliscriptslib.argparsewrapper import ArgumentParser
@@ -17,7 +18,7 @@ argparser.add_argument('--period', required=True,
                        help='Path to the period. E.g: "duck1010.spring2010"')
 args = argparser.parse_args()
 
-logincookie = login_using_args(args, 'test')
+logincookie = login_using_args(args, getpass())
 restful_factory = RestfulFactory(args.url)
 AssignmentGroupApi = restful_factory.make('/administrator/restfulsimplifiedassignmentgroup/')
 PeriodApi = restful_factory.make('/administrator/restfulsimplifiedperiod/')

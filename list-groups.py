@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import json
+from getpass import getpass
 from devilryrestfullib import RestfulFactory
 
 from devilrycliscriptslib.argparsewrapper import ArgumentParser
@@ -16,7 +17,7 @@ argparser.add_argument('--assignment', required=True,
                        help='Path to assignment. E.g: "duck1010.spring2010.assignment1"')
 args = argparser.parse_args()
 
-logincookie = login_using_args(args, 'test')
+logincookie = login_using_args(args, getpass())
 restful_factory = RestfulFactory(args.url)
 AssignmentGroupApi = restful_factory.make('/administrator/restfulsimplifiedassignmentgroup/')
 AssignmentApi = restful_factory.make('/administrator/restfulsimplifiedassignment/')
