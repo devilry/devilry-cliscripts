@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 from getpass import getpass
+import os
+import sys
 from devilryrestfullib import RestfulFactory
 
 from devilrycliscriptslib.argparsewrapper import ArgumentParser
@@ -26,7 +28,7 @@ AssignmentApi = restful_factory.make('/administrator/restfulsimplifiedassignment
 DeadlineApi = restful_factory.make('/administrator/restfulsimplifieddeadline/')
 DeliveryApi = restful_factory.make('/administrator/restfulsimplifieddelivery/')
 FileMetaApi = restful_factory.make('/administrator/restfulsimplifiedfilemeta/')
-
+FileMetaDownloadApi = restful_factory.make('/student/show-delivery/filedownload/')
 
 
 try:
@@ -40,22 +42,29 @@ groups = find_groups_in_assignment(AssignmentGroupApi,
         result_fieldgroups=['assignment', 'period', 'subject', 'users'],
         limit=10000)
 
-for group in groups:
+if not os.path.exists(outdir):
+    raise SystemExit('{} does not exist. Please create it before running this script.'.format(outdir))
+
+for groupnumber, group in enumerate(groups, start=1):
     assignmentpath = '{parentnode__parentnode__parentnode__short_name}.{parentnode__parentnode__short_name}.{parentnode__short_name}'.format(**group)
     usernames = '__'.join(group['candidates__student__username'])
-    print assignmentpath, usernames
-    deadlines = DeadlineApi.search(logincookie,
-            filters=[{'field': "assignment_group", 'comp': "exact", 'value': group['id']}])
-    for deadline in deadlines['items']:
-        deadlinename = 'deadline-{deadline}'.format(**deadline)
-        print '   ', deadlinename
-        deliveries = DeliveryApi.search(logincookie,
-            filters=[{'field': "deadline", 'comp':"exact", 'value': deadline['id']}],
-            orderby=['time_of_delivery'])
-        for number, delivery in enumerate(deliveries['items']):
-            print '       {}: {}'.format(number, delivery['time_of_delivery'])
-            filemetas = FileMetaApi.search(logincookie,
-                filters=[{'field': "delivery", 'comp':"exact", 'value': delivery['id']}])
-            for filemeta in filemetas['items']:
-                filename = filemeta['filename'].encode('ascii', 'replace').replace('?', 'X').replace(' ', '_')
-                print '         ', filename
+    assignmentdir = os.path.join(outdir, assignmentpath, usernames)
+    print 'Downloading all deliveries for {} (group {}/{})'.format(usernames, groupnumber, len(groups))
+
+    deliveries = DeliveryApi.search(logincookie,
+        filters=[{'field': "deadline__assignment_group", 'comp':"exact", 'value': group['id']}],
+        orderby=['time_of_delivery'])
+    for number, delivery in enumerate(deliveries['items']):
+        print '   {}: {}'.format(number, delivery['time_of_delivery'])
+        filemetas = FileMetaApi.search(logincookie,
+            filters=[{'field': "delivery", 'comp':"exact", 'value': delivery['id']}])
+        deliverydir = os.path.join(assignmentdir, 'delivery-{}'.format(number))
+        if not os.path.exists(deliverydir):
+            os.makedirs(deliverydir)
+        for filemeta in filemetas['items']:
+            filename = filemeta['filename'].encode('ascii', 'replace').replace('?', 'X').replace(' ', '_')
+            filepath = os.path.join(deliverydir, filename)
+            sys.stdout.write('      Downloading {} ...'.format(filename))
+            response = FileMetaDownloadApi.download(logincookie, filemeta['id'])
+            open(filepath, 'wb').write(response.read())
+            sys.stdout.write(' OK{}'.format(os.linesep))
