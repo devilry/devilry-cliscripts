@@ -16,18 +16,24 @@ argparser = ArgumentParser(description='Download all deliveries on an assignment
 add_common_args(argparser)
 argparser.add_argument('--assignment', required=True,
         help='Path to assignment. E.g: "duck1010.spring2010.assignment1"')
+argparser.add_argument('--role', required=True,
+        help='Your role. Valid values: "examiner", "administrator".')
 argparser.add_argument('--outdir', required=True,
         help='Local filesystem directory to put the result in. Will create a directory named what you put in ``--assignment`` within this directory.')
 args = argparser.parse_args()
 
 logincookie = login_using_args(args, getpass())
 outdir = args.outdir
+role = args.role
+if not role in ('examiner', 'administrator'):
+    raise SystemExit('Invalid role: {}. See --help.'.format(role))
+
 restful_factory = RestfulFactory(args.url)
-AssignmentGroupApi = restful_factory.make('/administrator/restfulsimplifiedassignmentgroup/')
-AssignmentApi = restful_factory.make('/administrator/restfulsimplifiedassignment/')
-DeadlineApi = restful_factory.make('/administrator/restfulsimplifieddeadline/')
-DeliveryApi = restful_factory.make('/administrator/restfulsimplifieddelivery/')
-FileMetaApi = restful_factory.make('/administrator/restfulsimplifiedfilemeta/')
+AssignmentApi = restful_factory.make('/{}/restfulsimplifiedassignment/'.format(role))
+AssignmentGroupApi = restful_factory.make('/{}/restfulsimplifiedassignmentgroup/'.format(role))
+DeadlineApi = restful_factory.make('/{}/restfulsimplifieddeadline/'.format(role))
+DeliveryApi = restful_factory.make('/{}/restfulsimplifieddelivery/'.format(role))
+FileMetaApi = restful_factory.make('/{}/restfulsimplifiedfilemeta/'.format(role))
 FileMetaDownloadApi = restful_factory.make('/student/show-delivery/filedownload/')
 
 
@@ -47,7 +53,11 @@ if not os.path.exists(outdir):
 
 for groupnumber, group in enumerate(groups, start=1):
     assignmentpath = '{parentnode__parentnode__parentnode__short_name}.{parentnode__parentnode__short_name}.{parentnode__short_name}'.format(**group)
-    usernames = '__'.join(group['candidates__student__username'])
+    if role == 'examiner':
+        usernamelist = group['candidates__identifier']
+    else:
+        usernamelist = group['candidates__student__username']
+    usernames = '__'.join(usernamelist)
     assignmentdir = os.path.join(outdir, assignmentpath, usernames)
     print 'Downloading all deliveries for {} (group {}/{})'.format(usernames, groupnumber, len(groups))
 
