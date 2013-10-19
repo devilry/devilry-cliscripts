@@ -6,13 +6,26 @@ import sys
 from devilryrestfullib import RestfulFactory
 
 from devilrycliscriptslib.argparsewrapper import ArgumentParser
+from devilrycliscriptslib.argparsewrapper import RawDescriptionHelpFormatter
 from devilrycliscriptslib.login import login_using_args
 from devilrycliscriptslib.commonargs import add_common_args
 from devilrycliscriptslib.queries import find_groups_in_assignment
 from devilrycliscriptslib.queries import find_assignment_id_by_shortnames
 from devilrycliscriptslib.utils import split_path
 
-argparser = ArgumentParser(description='Download all deliveries on an assignment.')
+example = """
+
+Examples
+========
+
+Download all assignments where you have admin permission:
+$ admin-download-all-deliveries-on-assignment.py --url https://devilry.ifi.uio.no --user myusername --assignment inf1000.2013h.oblig-3 --outdir . --role administrator
+
+Same example, but only download groups where you are examiner:
+$ admin-download-all-deliveries-on-assignment.py --url https://devilry.ifi.uio.no --user myusername --assignment inf1000.2013h.oblig-3 --outdir . --role examiner
+"""
+argparser = ArgumentParser(description='Download all deliveries on an assignment.', epilog=example,
+        formatter_class=RawDescriptionHelpFormatter)
 add_common_args(argparser)
 argparser.add_argument('--assignment', required=True,
         help='Path to assignment. E.g: "duck1010.spring2010.assignment1"')
