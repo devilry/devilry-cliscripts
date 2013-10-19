@@ -19,10 +19,10 @@ Examples
 ========
 
 Download all assignments where you have admin permission:
-$ admin-download-all-deliveries-on-assignment.py --url https://devilry.ifi.uio.no --user myusername --assignment inf1000.2013h.oblig-3 --outdir . --role administrator
+$ download-all-deliveries-on-assignment.py --url https://devilry.ifi.uio.no --user myusername --assignment inf1000.2013h.oblig-3 --outdir . --role administrator
 
 Same example, but only download groups where you are examiner:
-$ admin-download-all-deliveries-on-assignment.py --url https://devilry.ifi.uio.no --user myusername --assignment inf1000.2013h.oblig-3 --outdir . --role examiner
+$ download-all-deliveries-on-assignment.py --url https://devilry.ifi.uio.no --user myusername --assignment inf1000.2013h.oblig-3 --outdir . --role examiner
 """
 argparser = ArgumentParser(description='Download all deliveries on an assignment.', epilog=example,
         formatter_class=RawDescriptionHelpFormatter)
