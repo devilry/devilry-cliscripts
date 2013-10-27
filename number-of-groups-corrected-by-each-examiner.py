@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 from getpass import getpass
 from devilryrestfullib import RestfulFactory
 
@@ -23,45 +24,74 @@ restful_factory = RestfulFactory(args.url)
 AssignmentGroupApi = restful_factory.make('/administrator/restfulsimplifiedassignmentgroup/')
 PeriodApi = restful_factory.make('/administrator/restfulsimplifiedperiod/')
 ExaminerApi = restful_factory.make('/administrator/restfulsimplifiedexaminer/')
+StaticFeedbackApi = restful_factory.make('/administrator/restfulsimplifiedstaticfeedback/')
 
 
 def list_number_of_assignments_corrected_by_examiners(period):
-    examiners = find_all_examiners_in_period(ExaminerApi, logincookie, period)
-    groups = find_all_assignmentgroups_in_period(AssignmentGroupApi, logincookie, period)
+    print 'Reading information about all examiners. This takes a lot of time for large courses...'
+    examiners_by_group = find_all_examiners_in_period(ExaminerApi, logincookie, period)
+    examinerusers = {}
+    for groupid, examiners in examiners_by_group.iteritems(): # NOTE: Exceptionally inefficient method of getting the username->name map for all examiners
+        for examiner in examiners:
+            examinerusers[examiner['user']] = examiner['user__devilryuserprofile__full_name'] or examiner['user__username']
+
+    groups = find_all_assignmentgroups_in_period(AssignmentGroupApi, logincookie, period,
+                                   result_fieldgroups=['assignment', 'feedback'])
     assignment_shortnames = ['TOTAL']
     result = {}
 
     # Count corrected assignments and store them by examiner->assignment->count in ``result``
-    for group in groups:
+    longest_examinername_length = 0
+    longest_assignmentname_length = 0
+    for groupnumber, group in enumerate(groups, start=1):
+        loading_message = 'Collecting data from group {:8}/{:<8}'.format(groupnumber, len(groups))
+        if groupnumber > 1:
+            sys.stdout.write('\b' * len(loading_message)) # Remove the last message (we update the same line with the message)
+        sys.stdout.write(loading_message)
+        sys.stdout.flush()
+
         assignment_shortname = group['parentnode__short_name']
         if not assignment_shortname in assignment_shortnames:
             assignment_shortnames.append(assignment_shortname)
+        if len(assignment_shortname) > longest_assignmentname_length:
+            longest_assignmentname_length = len(assignment_shortname)
+
         groupid = group['id']
-        if groupid in examiners:
-            groupexaminers = examiners[groupid]
-            for examiner in groupexaminers:
-                examiner_username = examiner['user__username']
-                if not examiner_username in result:
-                    result[examiner_username] = {'TOTAL': 0}
-                result[examiner_username]['TOTAL'] += 1
-                if assignment_shortname in result[examiner_username]:
-                    result[examiner_username][assignment_shortname] += 1
-                else:
-                    result[examiner_username][assignment_shortname] = 1
+        if group['is_open']:
+            continue
+        feedback_id = group['feedback']
+        if feedback_id == None:
+            continue
+        feedback = StaticFeedbackApi.read(logincookie, feedback_id)
+        saved_by_examiner_id = feedback['saved_by']
+        examiner_name = examinerusers.get(saved_by_examiner_id, 'Unknown user (id: {})'.format(saved_by_examiner_id))
+        if len(examiner_name) > longest_examinername_length:
+            longest_examinername_length = len(examiner_name)
+        if not examiner_name in result:
+            result[examiner_name] = {'TOTAL': 0}
+        result[examiner_name]['TOTAL'] += 1
+        if assignment_shortname in result[examiner_name]:
+            result[examiner_name][assignment_shortname] += 1
         else:
-            pass # Group has no examiners, and perhaps you want to print a warning?
+            result[examiner_name][assignment_shortname] = 1
+    print
+    print
+
 
     # Print result in a table
-    stringformat = '{:<14} | '
-    headerrow = stringformat.format('Examiner')
+    examinerformat = '{{:<{length}}} | '.format(length=longest_examinername_length)
+    if longest_assignmentname_length < 4:
+        longest_assignmentname_length = 4
+    assignmentformat = '{{:<{length}}} | '.format(length=longest_assignmentname_length)
+    headerrow = examinerformat.format('Examiner')
     for assignment_shortname in assignment_shortnames:
-        headerrow += stringformat.format(assignment_shortname)
+        headerrow += assignmentformat.format(assignment_shortname)
     print headerrow
-    for examiner_username, count_by_assignment in result.iteritems():
-        row = stringformat.format(examiner_username)
+    for examiner_name, count_by_assignment in result.iteritems():
+        row = examinerformat.format(examiner_name.encode('ascii', 'replace'))
         for assignment_shortname in assignment_shortnames:
             count = count_by_assignment.get(assignment_shortname, '')
-            row += stringformat.format(count)
+            row += assignmentformat.format(count)
         print row
 
 
