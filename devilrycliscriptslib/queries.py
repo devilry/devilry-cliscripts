@@ -59,13 +59,13 @@ def find_all_examiners_in_period(ExaminerApi, logincookie, period_id):
     return result
 
 
-def find_all_assignmentgroups_in_period(AssignmentGroupApi, logincookie, period_id):
+def find_all_assignmentgroups_in_period(AssignmentGroupApi, logincookie, period_id, result_fieldgroups=['assignment']):
     search = AssignmentGroupApi.search(logincookie,
                                        limit=100000,
                                        filters=[{'field':'parentnode__parentnode',
                                                  'comp':'exact',
                                                  'value':period_id}],
-                                       result_fieldgroups=['assignment']) # Include info about the assignment in the result
+                                       result_fieldgroups=result_fieldgroups)
     return search['items']
 
 
