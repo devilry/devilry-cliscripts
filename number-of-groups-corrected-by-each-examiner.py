@@ -80,8 +80,8 @@ def list_number_of_assignments_corrected_by_examiners(period):
 
     # Print result in a table
     examinerformat = '{{:<{length}}} | '.format(length=longest_examinername_length)
-    if longest_assignmentname_length < 4:
-        longest_assignmentname_length = 4
+    if longest_assignmentname_length < len('TOTAL'):
+        longest_assignmentname_length = len('TOTAL')
     assignmentformat = '{{:<{length}}} | '.format(length=longest_assignmentname_length)
     headerrow = examinerformat.format('Examiner')
     for assignment_shortname in assignment_shortnames:
